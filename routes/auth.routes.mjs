@@ -5,7 +5,8 @@ import { USER_VIA } from "../constants.mjs";
 
 import {
   createUser,
-  findUser
+  findUser,
+  updateUser
 } from "../db/repository.mjs";
 
 const PASSOWRD_MIN_LENGTH = 8;
@@ -107,5 +108,40 @@ const signup = async (req, res) => {
 };
 
 router.post('/signup', signup);
+
+const validateQueryParams = (query) => {
+  if (Object.keys(query).length != 2) {
+    throw new Error("Invalid link");
+  }
+
+  const { email, t: token } = query;
+  if (!email || !token) {
+    throw new Error("Invalid link");
+  }
+};
+
+const verifyAccount = async (req, res) => {
+  const { query } = req;
+
+  try {
+    validateQueryParams(query);
+  } catch (error) {
+    return res.status(400).json({ message: "Invalid link" })
+  }
+
+  try {
+    const { email, t: token } = query;
+    await findUser({ email, isVerified: false, verificationToken: token });
+    await updateUser({ email }, { isVerified: true, verificationToken: "" });
+
+
+  } catch (error) {
+    return res.status(400).json({ message: "Invalid link" })
+  }
+
+  return res.status(200).json({ msg: "User verified successfully" });
+};
+
+router.post('/verify-account', verifyAccount);
 
 export { router };

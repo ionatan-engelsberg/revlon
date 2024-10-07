@@ -48,3 +48,15 @@ export const createUser = async (user) => {
   return dbUser;
 };
 
+export const updateUser = async (filter, updatedData) => {
+  try {
+    const res = await UserModel.updateOne(filter, updatedData);
+
+    if (res.nModified <= 0) {
+      throw new Error("Internal server error");
+    }
+  } catch (error) {
+    throw new Error(error.message ?? "Internal server error");
+  }
+};
+
