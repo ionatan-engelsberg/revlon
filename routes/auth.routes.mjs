@@ -1,5 +1,7 @@
 import express from "express";
+import jwt from 'jsonwebtoken';
 import { hashSync, genSaltSync, compareSync } from 'bcrypt';
+import { config } from 'dotenv';
 
 import { USER_VIA } from "../constants.mjs";
 
@@ -9,7 +11,15 @@ import {
   updateUser
 } from "../db/repository.mjs";
 
+config();
+
+const { JWT_SECRET } = process.env
+
 const PASSOWRD_MIN_LENGTH = 8;
+
+const MILISECONDS_IN_ONE_MINUTE = 1000 * 60;
+const MILISECONDS_IN_ONE_HOUR = MILISECONDS_IN_ONE_MINUTE * 60;
+const JWT_VALIDATION_TIME = 6 * MILISECONDS_IN_ONE_HOUR;
 
 const router = express.Router();
 
@@ -143,5 +153,49 @@ const verifyAccount = async (req, res) => {
 };
 
 router.post('/verify-account', verifyAccount);
+
+const validateLoginBody = (body) => {
+  if (Object.keys(body).length != 2) {
+    throw new Error("Incorrect body");
+  }
+
+  const { email, password } = body
+  if (!email || !password) {
+    throw new Error("Incorrect body");
+  }
+};
+
+const createJWT = async (data) => {
+  return jwt.sign({ data }, JWT_SECRET, { expiresIn: JWT_VALIDATION_TIME });
+};
+
+const login = async (req, res) => {
+  const { body } = req
+
+  try {
+    validateLoginBody(body);
+  } catch (error) {
+    return res.status(400).json({ message: error.message })
+  }
+
+  try {
+    const { email, password } = body;
+    const user = await findUser({ email }, "_id password");
+
+    const isPasswordCorrect = compareSync(password, user.password);
+
+    if (!isPasswordCorrect) {
+      throw new Error("Incorrect credentials");
+    }
+
+  } catch (error) {
+    return res.status(400).json({ message: error.message ?? "Incorrect credentials" });
+  }
+
+  const jwt = await createJWT(body);
+  return res.status(200).json({ token: jwt });
+};
+
+router.post('/login', login);
 
 export { router };
