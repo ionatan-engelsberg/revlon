@@ -40,7 +40,14 @@ export const UserSchema = new Schema({
       values: Object.values(USER_VIA),
       message: `User via must be noe of the following: ${Object.values(USER_VIA)}`
     }
+  },
+  isVerified: {
+    type: Boolean
+  },
+  verificationToken: {
+    type: String
   }
-});
+},
+  { timestamps: true, versionKey: false });
 
 export const UserModel = model('User', UserSchema);

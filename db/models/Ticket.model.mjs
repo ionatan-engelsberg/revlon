@@ -41,7 +41,7 @@ export const TicketSchema = new Schema({
   store: {
     type: String,
     required: ["Ticket store is required"],
-    enum:{
+    enum: {
       values: Object.values(TICKET_STORE),
       message: `Ticket store must be one of the following: ${Object.values(TICKET_STORE)}`
     }
@@ -49,7 +49,7 @@ export const TicketSchema = new Schema({
   type: {
     type: String,
     required: ["Ticket type is required"],
-    enum:{
+    enum: {
       values: Object.values(ORDER_TYPE),
       message: `Ticket type must be one of the following: ${Object.values(ORDER_TYPE)}`
     }
@@ -60,6 +60,7 @@ export const TicketSchema = new Schema({
     min: 1,
     max: 2
   }
-});
+},
+  { timestamps: true, versionKey: false });
 
 export const TicketModel = model('Ticket', TicketSchema);

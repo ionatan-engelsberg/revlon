@@ -15,6 +15,7 @@ export const ProductSchema = new Schema({
     required: [true, 'Product bar code is required'],
     unique: true
   }
-});
+},
+  { timestamps: true, versionKey: false });
 
 export const ProductModel = model('Product', ProductSchema);
