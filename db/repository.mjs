@@ -60,3 +60,51 @@ export const updateUser = async (filter, updatedData) => {
   }
 };
 
+export const getProduct = async (filter, fields) => {
+  let product;
+  const selectedFields = fields ?? "_id";
+
+  try {
+    product = await ProductModel.findOne(filter).select(selectedFields);
+  } catch (error) {
+    handleMongoError(error);
+    product = null;
+  }
+
+  if (!product) {
+    throw new Error('Product with provided filter does not exist');
+  }
+
+  return product;
+};
+
+export const createTicket = async (ticket) => {
+  const dbTicket = new TicketModel(ticket);
+
+  try {
+    await dbTicket.save();
+  } catch (error) {
+    handleMongoError(error);
+    throw new Error(error.message ?? 'There was an error while creating the Ticket');
+  }
+
+  return dbTicket;
+};
+
+export const getContest = async (contestId, fields) => {
+  let contest;
+  const selectedFields = fields ?? "_id";
+
+  try {
+    contest = await ContestModel.findById(contestId).select(selectedFields);
+  } catch (error) {
+    handleMongoError(error);
+    contest = null;
+  }
+
+  if (!contest) {
+    throw new Error('Contest with provided filter does not exist');
+  }
+
+  return contest;
+};

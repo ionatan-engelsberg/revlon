@@ -178,9 +178,10 @@ const login = async (req, res) => {
     return res.status(400).json({ message: error.message })
   }
 
+  let user;
   try {
     const { email, password } = body;
-    const user = await findUser({ email }, "_id password");
+    user = await findUser({ email }, "_id password");
 
     const isPasswordCorrect = compareSync(password, user.password);
 
@@ -192,7 +193,7 @@ const login = async (req, res) => {
     return res.status(400).json({ message: error.message ?? "Incorrect credentials" });
   }
 
-  const jwt = await createJWT(body);
+  const jwt = await createJWT({ id: user._id });
   return res.status(200).json({ token: jwt });
 };
 

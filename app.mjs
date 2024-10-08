@@ -4,6 +4,7 @@ import { connect } from "mongoose";
 import { config } from 'dotenv';
 
 import { router as authRouter } from './routes/auth.routes.mjs';
+import { router as userRouter } from './routes/user.routes.mjs';
 
 config();
 
@@ -15,6 +16,7 @@ const MONGODB_URI = `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MON
 const PORT = process.env.PORT || 8080;
 
 app.use('/auth', authRouter);
+app.use('/tickets', userRouter);
 
 connect(MONGODB_URI)
   .then(() => {

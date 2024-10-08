@@ -15,7 +15,7 @@ export const ContestSchema = new Schema({
     required: [true, 'Contest start date is required']
   },
   endDate: {
-    type: String,
+    type: Date,
     required: [true, 'Contest end date is required']
   },
   main: {
@@ -23,6 +23,6 @@ export const ContestSchema = new Schema({
     default: false
   }
 },
-  { timestamps: true, versionKey: false });
+  { timestamps: false, versionKey: false });
 
 export const ContestModel = model('Contest', ContestSchema);

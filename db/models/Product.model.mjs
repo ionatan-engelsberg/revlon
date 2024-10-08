@@ -16,6 +16,6 @@ export const ProductSchema = new Schema({
     unique: true
   }
 },
-  { timestamps: true, versionKey: false });
+  { timestamps: false, versionKey: false });
 
 export const ProductModel = model('Product', ProductSchema);

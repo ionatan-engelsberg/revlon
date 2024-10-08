@@ -57,7 +57,7 @@ export const TicketSchema = new Schema({
   guesses: {
     type: [GuessSchema],
     required: [true, 'Guesses are required'],
-    min: 1,
+    min: 2,
     max: 2
   }
 },
