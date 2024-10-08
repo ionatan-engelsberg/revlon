@@ -91,6 +91,20 @@ export const createTicket = async (ticket) => {
   return dbTicket;
 };
 
+export const getUserTickets = async (userId) => {
+  let tickets;
+  const fields = "_id number date image store type guesses";
+
+  try {
+    tickets = await TicketModel.find({ user: userId }).select(fields);
+  } catch (error) {
+    handleMongoError(error);
+    tickets = [];
+  }
+
+  return tickets;
+};
+
 export const getContest = async (contestId, fields) => {
   let contest;
   const selectedFields = fields ?? "_id";

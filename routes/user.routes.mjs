@@ -1,10 +1,9 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import { config } from "dotenv";
 
 import { ORDER_TYPE, TICKET_STORE } from "../constants.mjs";
 
-import { createTicket, getContest, getProduct } from "../db/repository.mjs";
+import { createTicket, getContest, getProduct, getUserTickets } from "../db/repository.mjs";
 
 const router = express.Router();
 
@@ -32,6 +31,7 @@ const checkIfAuthenticated = (req, res) => {
   return id;
 };
 
+// TODO
 const validateTicketNumber = (number, store, type) => { };
 
 const validateUploadTicketBody = async (body) => {
@@ -90,7 +90,7 @@ const uploadTicket = async (req, res) => {
     return res.status(400).json({ message: error.message ?? "Invalid body" });
   }
 
-  const { barCode, number, date, image, store, type, guesses } = req.body;
+  const { number, date, image, store, type, guesses } = req.body;
 
   try {
     const ticket = {
@@ -111,21 +111,27 @@ const uploadTicket = async (req, res) => {
     return res.status(500).json({ message: error.message ?? "There was an error while uploading the ticket" });
 
   }
-
-
 };
 
 router.post('/', uploadTicket);
 
-const getUserTickets = async (req, res) => {
+const getTicketsFromUser = async (req, res) => {
   let userId;
   try {
     userId = checkIfAuthenticated(req, res);
   } catch (error) {
     return res.status(401).json({ message: error.message ?? "Unauthorized" })
   }
+
+  try {
+    const tickets = await getUserTickets(userId);
+    return res.status(200).json(tickets)
+  } catch (error) {
+    console.log("ERROR: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
 
-router.get('/', getUserTickets);
+router.get('/', getTicketsFromUser);
 
 export { router };
