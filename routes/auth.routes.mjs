@@ -37,7 +37,7 @@ const validateBirthdate = (birthdateString) => {
   }
 
   if (age < 18) {
-    throw new Error("User must be 18 or older");
+    throw new Error("Debes tener 18 años o más para registrarte");
   }
 };
 
@@ -61,7 +61,7 @@ const validateSignUpBody = (body) => {
     !zipCode ||
     !via
   ) {
-    throw new Error("Some attribute is missing");
+    throw new Error("Debes completar todos los campos para avanzar");
   }
 
   if (!Object.values(USER_VIA).includes(via)) {
@@ -71,15 +71,15 @@ const validateSignUpBody = (body) => {
   validateBirthdate(birthdate);
 
   if (password.length < PASSOWRD_MIN_LENGTH) {
-    throw new Error("Password must be at least 8 chars");
+    throw new Error("La contraseña debe tener al menos 8 caracteres");
   }
 
   if (firstName.length < 3 || firstName.length > 50) {
-    throw new Error("First name must be between 3 and 50 chars");
+    throw new Error("El nombre debe tener entre 3 y 50 caracteres");
   }
 
   if (lastName.length < 3 || lastName.length > 50) {
-    throw new Error("Last name must be between 3 and 50 chars");
+    throw new Error("El apellido debe tener entre 3 y 50 caracteres");
   }
 };
 
@@ -95,7 +95,7 @@ const signup = async (req, res) => {
   let existingUser;
   try {
     existingUser = await findUser({ email: body.email });
-    return res.status(409).json({ message: "User with provided email already exists" });
+    return res.status(409).json({ message: "El email ingresado ya está siendo utilizado" });
   } catch (error) { }
 
   let createdUser;
@@ -121,12 +121,12 @@ router.post('/signup', signup);
 
 const validateQueryParams = (query) => {
   if (Object.keys(query).length != 2) {
-    throw new Error("Invalid link");
+    throw new Error("El link es incorrecto o ya expiró");
   }
 
   const { email, t: token } = query;
   if (!email || !token) {
-    throw new Error("Invalid link");
+    throw new Error("El link es incorrecto o ya expiró");
   }
 };
 
@@ -136,7 +136,7 @@ const verifyAccount = async (req, res) => {
   try {
     validateQueryParams(query);
   } catch (error) {
-    return res.status(400).json({ message: "Invalid link" })
+    return res.status(400).json({ message: "El link es incorrecto o ya expiró" })
   }
 
   try {
@@ -146,7 +146,7 @@ const verifyAccount = async (req, res) => {
 
 
   } catch (error) {
-    return res.status(400).json({ message: "Invalid link" })
+    return res.status(400).json({ message: "El link es incorrecto o ya expiró" })
   }
 
   return res.status(200).json({ msg: "User verified successfully" });
@@ -156,12 +156,12 @@ router.post('/verify-account', verifyAccount);
 
 const validateLoginBody = (body) => {
   if (Object.keys(body).length != 2) {
-    throw new Error("Incorrect body");
+    throw new Error("Debes enviar email y contraseña para iniciar sesión");
   }
 
   const { email, password } = body
   if (!email || !password) {
-    throw new Error("Incorrect body");
+    throw new Error("Debes enviar email y contraseña para iniciar sesión");
   }
 };
 
@@ -186,11 +186,11 @@ const login = async (req, res) => {
     const isPasswordCorrect = compareSync(password, user.password);
 
     if (!isPasswordCorrect) {
-      throw new Error("Incorrect credentials");
+      throw new Error("Email o contraseña incorrectas");
     }
 
   } catch (error) {
-    return res.status(400).json({ message: error.message ?? "Incorrect credentials" });
+    return res.status(400).json({ message: error.message ?? "Email o contraseña incorrectas" });
   }
 
   const jwt = await createJWT({ id: user._id });

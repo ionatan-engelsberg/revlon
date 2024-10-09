@@ -45,14 +45,14 @@ const validateUploadTicketBody = async (body) => {
     !barCode ||
     !guesses
   ) {
-    throw new Error("Some attribute is missing");
+    throw new Error("Debes completar todos los campos para avanzar");
   }
 
   if (!Object.values(ORDER_TYPE).includes(type)) {
-    throw new Error(`Ticket type must be one of the following: ${Object.values(ORDER_TYPE)}`);
+    throw new Error(`El tipo de compra debe ser uno de los siguientes: ${Object.values(ORDER_TYPE)}`);
   }
   if (!Object.values(TICKET_STORE).includes(store)) {
-    throw new Error(`Ticket store must be one of the following: ${Object.values(TICKET_STORE)}`);
+    throw new Error(`La tienda de compra debe ser una de las siguientes: ${Object.values(TICKET_STORE)}`);
   }
 
   if (typeof guesses != "object" || guesses.length != 2) {
@@ -60,7 +60,7 @@ const validateUploadTicketBody = async (body) => {
   }
 
   if (guesses[0].contest == guesses[1].contest) {
-    throw new Error("Guess contests must be different");
+    throw new Error("No puede ingresar dos adivinanzas para el mismo concurso");
   }
 
   for (const g of guesses) {
@@ -108,7 +108,7 @@ const uploadTicket = async (req, res) => {
 
     return res.status(200).json({ message: "OK" })
   } catch (error) {
-    return res.status(500).json({ message: error.message ?? "There was an error while uploading the ticket" });
+    return res.status(500).json({ message: error.message ?? "Ocurrió un error al intentar subir el ticket.Por favor vuelva a intentarlo" });
 
   }
 };
@@ -116,7 +116,7 @@ const uploadTicket = async (req, res) => {
 router.post('/', uploadTicket);
 
 const getTicketsFromUser = async (req, res) => {
-  let userId;
+ let userId;
   try {
     userId = checkIfAuthenticated(req, res);
   } catch (error) {
@@ -127,8 +127,7 @@ const getTicketsFromUser = async (req, res) => {
     const tickets = await getUserTickets(userId);
     return res.status(200).json(tickets)
   } catch (error) {
-    console.log("ERROR: ", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Ocurrió un error en el servidor. Por favor vuelva a intentarlo" });
   }
 };
 
