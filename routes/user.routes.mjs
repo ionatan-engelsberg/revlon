@@ -168,7 +168,7 @@ router.post('/', uploadTicket);
 
 const generateApiSignature = async (req, res) => {
   try {
-    userId = checkIfAuthenticated(req, res);
+    checkIfAuthenticated(req, res);
   } catch (error) {
     return res.status(401).json({ message: error.message ?? "Unauthorized" })
   }

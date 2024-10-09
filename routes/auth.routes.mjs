@@ -112,8 +112,9 @@ const signup = async (req, res) => {
 
   // TODO: send verifyAccount email
 
-  const { _id, firstName, lastName, email, birthdate } = createdUser;
-  const returnedUser = { _id, firstName, lastName, email, birthdate };
+  // TODO: Delete verification token from response
+  const { _id, firstName, lastName, email, birthdate, verificationToken } = createdUser;
+  const returnedUser = { _id, firstName, lastName, email, birthdate, verificationToken };
   return res.status(201).json(returnedUser)
 };
 
