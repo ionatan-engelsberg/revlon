@@ -181,12 +181,15 @@ const login = async (req, res) => {
   let user;
   try {
     const { email, password } = body;
-    user = await findUser({ email }, "_id password");
+    user = await findUser({ email }, "_id password isVerified");
 
     const isPasswordCorrect = compareSync(password, user.password);
 
     if (!isPasswordCorrect) {
       throw new Error("Email o contraseña incorrectas");
+    }
+    if (!user.isVerified) {
+      throw new Error("Debes verificar la cuenta para poder iniciar sesión");
     }
 
   } catch (error) {
