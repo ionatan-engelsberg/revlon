@@ -9,7 +9,8 @@ const DUPLICATE_VALUE_ERROR_CODE = 11000;
 
 const handleMongoError = (error) => {
   if (error.code === DUPLICATE_VALUE_ERROR_CODE) {
-    throw new Error(`Duplicate key value: ${error.keyValue}`);
+    const duplicateValue = Object.keys(error.keyValue)[0];
+    throw new Error(`Conflict error: ${duplicateValue} is already in use`);
   }
 
   if (error instanceof Error.ValidationError) {

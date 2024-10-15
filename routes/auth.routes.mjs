@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 import { hashSync, genSaltSync, compareSync } from 'bcrypt';
 import { config } from 'dotenv';
 
@@ -13,7 +14,7 @@ import {
 
 config();
 
-const { JWT_SECRET } = process.env
+const { JWT_SECRET, NODEMAILER_EMAIL, NODEMAILER_PASSWORD } = process.env
 
 const PASSOWRD_MIN_LENGTH = 8;
 
@@ -83,6 +84,37 @@ const validateSignUpBody = (body) => {
   }
 };
 
+const sendVerificationEmail = async (email, firstName, lastName, verificationToken) => {
+  const transport = nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    auth: {
+      user: NODEMAILER_EMAIL,
+      pass: NODEMAILER_PASSWORD
+    }
+  });
+
+  const accountVerificationLink = `http://example.com/api?t=${verificationToken}&email=${email}`;
+
+  const message = {
+    from: NODEMAILER_EMAIL,
+    to: email,
+    subject: "Account verification",
+    html: `
+    Hola, ${firstName} ${lastName}!
+    <p>Haz click <a href="${accountVerificationLink}">aquí</a> verificar tu cuenta</p>
+    `
+  };
+
+  try {
+    await transport.sendMail(message);
+    // TODO: Verification handling
+  } catch (error) {
+    console.log("ERROR: ", error);
+    // TODO: Error handling
+  }
+};
+
 const signup = async (req, res) => {
   const { body } = req;
 
@@ -95,7 +127,7 @@ const signup = async (req, res) => {
   let existingUser;
   try {
     existingUser = await findUser({ email: body.email });
-    return res.status(409).json({ message: "El email ingresado ya está siendo utilizado" });
+    return res.status(409).jsonn({ message: "El email ingresado ya está siendo utilizado" });
   } catch (error) { }
 
   let createdUser;
@@ -110,11 +142,10 @@ const signup = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 
-  // TODO: send verifyAccount email
-
-  // TODO: Delete verification token from response
   const { _id, firstName, lastName, email, birthdate, verificationToken } = createdUser;
-  const returnedUser = { _id, firstName, lastName, email, birthdate, verificationToken };
+  const returnedUser = { _id, firstName, lastName, email, birthdate };
+
+  await sendVerificationEmail(email, firstName, lastName, verificationToken);
   return res.status(201).json(returnedUser)
 };
 
