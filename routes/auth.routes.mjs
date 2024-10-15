@@ -213,7 +213,7 @@ const login = async (req, res) => {
   let user;
   try {
     const { email, password } = body;
-    user = await findUser({ email }, "_id password isVerified");
+    user = await findUser({ email }, "_id firstName password isVerified");
 
     const isPasswordCorrect = compareSync(password, user.password);
 
@@ -229,7 +229,7 @@ const login = async (req, res) => {
   }
 
   const jwt = await createJWT({ id: user._id });
-  return res.status(200).json({ token: jwt });
+  return res.status(200).json({ token: jwt, firstName: user.firstName });
 };
 
 router.post('/login', login);
