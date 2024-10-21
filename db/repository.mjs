@@ -30,7 +30,7 @@ export const findUser = async (filter, fields) => {
   }
 
   if (!user) {
-    throw new Error('User with provided filter does not exist');
+    throw new Error('Email o contraseña incorrectas');
   }
 
   return user;
@@ -94,7 +94,7 @@ export const createTicket = async (ticket) => {
 
 export const getUserTickets = async (userId) => {
   let tickets;
-  const fields = "_id number date image store type guesses";
+  const fields = "_id number date image store type guesses createdAt";
 
   try {
     tickets = await TicketModel.find({ user: userId }).select(fields);
