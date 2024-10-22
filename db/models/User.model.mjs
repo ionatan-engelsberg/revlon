@@ -46,6 +46,14 @@ export const UserSchema = new Schema({
   },
   verificationToken: {
     type: String
+  },
+  state: {
+    type: String,
+    required: [true, "User state is required"]
+  },
+  locality: {
+    type: String,
+    required: [true, "User locality is required"]
   }
 },
   { timestamps: true, versionKey: false });

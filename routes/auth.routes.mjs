@@ -50,7 +50,9 @@ const validateSignUpBody = (body) => {
     password,
     birthdate,
     zipCode,
-    via
+    via,
+    state,
+    locality
   } = body
 
   if (
@@ -60,7 +62,9 @@ const validateSignUpBody = (body) => {
     !password ||
     !birthdate ||
     !zipCode ||
-    !via
+    !via ||
+    !state ||
+    !locality
   ) {
     throw new Error("Debes completar todos los campos para avanzar");
   }
@@ -70,6 +74,10 @@ const validateSignUpBody = (body) => {
   }
 
   validateBirthdate(birthdate);
+
+  if (zipCode.length < 5) {
+    throw new Error("El código postal ingresado es inválido");
+  }
 
   if (password.length < PASSOWRD_MIN_LENGTH) {
     throw new Error("La contraseña debe tener al menos 8 caracteres");
