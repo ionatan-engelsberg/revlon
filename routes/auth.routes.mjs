@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 import { hashSync, genSaltSync, compareSync } from 'bcrypt';
 import { config } from 'dotenv';
 
-import { USER_VIA } from "../constants.mjs";
+import { USER_VIA, STATES, LOCALITIES } from "../constants.mjs";
 
 import {
   createUser,
@@ -75,8 +75,16 @@ const validateSignUpBody = (body) => {
 
   validateBirthdate(birthdate);
 
-  if (zipCode.length < 5) {
+  if (zipCode.length != 5) {
     throw new Error("El código postal ingresado es inválido");
+  }
+
+  if (!STATES.includes(state)) {
+    throw new Error("El estado ingresado es inválido");
+  }
+
+  if (!LOCALITIES[state].includes(locality)) {
+    throw new Error(`El municipio ingresado es inválido. Los posibles municipios para el estado ${state} son ${LOCALITIES[state]}`);
   }
 
   if (password.length < PASSOWRD_MIN_LENGTH) {
