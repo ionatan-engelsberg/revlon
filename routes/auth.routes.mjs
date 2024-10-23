@@ -102,7 +102,7 @@ const sendVerificationEmail = async (email, firstName, lastName, verificationTok
     }
   });
 
-  const accountVerificationLink = `http://example.com/api?t=${verificationToken}&email=${email}`;
+  const accountVerificationLink = `http://localhost:5173/verify-account?t=${verificationToken}&email=${email}`;
 
   const message = {
     from: NODEMAILER_EMAIL,
