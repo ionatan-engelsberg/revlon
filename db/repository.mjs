@@ -97,7 +97,7 @@ export const getUserTickets = async (userId) => {
   const fields = "_id number date image store type guesses createdAt";
 
   try {
-    tickets = await TicketModel.find({ user: userId }).select(fields);
+    tickets = await TicketModel.find({ user: userId }).select(fields).sort({createdAt: -1});
   } catch (error) {
     handleMongoError(error);
     tickets = [];
