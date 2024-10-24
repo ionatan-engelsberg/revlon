@@ -51,10 +51,10 @@ export const UserSchema = new Schema({
     type: String,
     required: [true, "User state is required"]
   },
-  locality: {
-    type: String,
-    required: [true, "User locality is required"]
-  }
+  // locality: {
+  //   type: String,
+  //   required: [true, "User locality is required"]
+  // }
 },
   { timestamps: true, versionKey: false });
 

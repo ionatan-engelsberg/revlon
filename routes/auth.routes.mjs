@@ -52,7 +52,7 @@ const validateSignUpBody = (body) => {
     zipCode,
     via,
     state,
-    locality
+    //locality
   } = body
 
   if (
@@ -63,8 +63,8 @@ const validateSignUpBody = (body) => {
     !birthdate ||
     !zipCode ||
     !via ||
-    !state ||
-    !locality
+    !state 
+    //!locality
   ) {
     throw new Error("Debes completar todos los campos para avanzar");
   }
@@ -83,9 +83,9 @@ const validateSignUpBody = (body) => {
     throw new Error("El estado ingresado es inválido");
   }
 
-  if (!LOCALITIES[state].includes(locality)) {
-    throw new Error(`El municipio ingresado es inválido. Los posibles municipios para el estado ${state} son ${LOCALITIES[state]}`);
-  }
+  // if (!LOCALITIES[state].includes(locality)) {
+  //   throw new Error(`El municipio ingresado es inválido. Los posibles municipios para el estado ${state} son ${LOCALITIES[state]}`);
+  // }
 
   if (password.length < PASSOWRD_MIN_LENGTH) {
     throw new Error("La contraseña debe tener al menos 8 caracteres");
