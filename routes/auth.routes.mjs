@@ -10,7 +10,7 @@ import { createUser, findUser, updateUser } from "../db/repository.mjs";
 
 config();
 
-const { JWT_SECRET, NODEMAILER_EMAIL, NODEMAILER_PASSWORD } = process.env;
+const { JWT_SECRET, ZOHO_EMAIL, ZOHO_PASSWORD } = process.env;
 
 const PASSOWRD_MIN_LENGTH = 8;
 
@@ -108,8 +108,8 @@ const sendVerificationEmail = async (
   const transport = nodemailer.createTransport({
     host: "smtp.zoho.com",
     auth: {
-      user: NODEMAILER_EMAIL,
-      pass: NODEMAILER_PASSWORD,
+      user: ZOHO_EMAIL,
+      pass: ZOHO_PASSWORD,
     },
     port: 465,
     secure: true,
@@ -122,7 +122,7 @@ const sendVerificationEmail = async (
   const accountVerificationLink = `http://localhost:5173/verify-account?t=${verificationToken}&email=${email}`;
 
   const message = {
-    from: NODEMAILER_EMAIL,
+    from: ZOHO_EMAIL,
     to: email,
     subject: "Account verification",
     html: `
