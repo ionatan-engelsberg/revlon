@@ -1,20 +1,16 @@
 import express from "express";
-import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
-import { hashSync, genSaltSync, compareSync } from 'bcrypt';
-import { config } from 'dotenv';
+import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import { hashSync, genSaltSync, compareSync } from "bcrypt";
+import { config } from "dotenv";
 
 import { USER_VIA, STATES, LOCALITIES } from "../constants.mjs";
 
-import {
-  createUser,
-  findUser,
-  updateUser
-} from "../db/repository.mjs";
+import { createUser, findUser, updateUser } from "../db/repository.mjs";
 
 config();
 
-const { JWT_SECRET, NODEMAILER_EMAIL, NODEMAILER_PASSWORD } = process.env
+const { JWT_SECRET, NODEMAILER_EMAIL, NODEMAILER_PASSWORD } = process.env;
 
 const PASSOWRD_MIN_LENGTH = 8;
 
@@ -31,8 +27,9 @@ const validateBirthdate = (birthdateString) => {
   let age = CURRENT_TIME.getFullYear() - birthdate.getFullYear();
 
   if (
-    (CURRENT_TIME.getMonth() - birthdate.getMonth() < 0) ||
-    ((CURRENT_TIME.getMonth() == birthdate.getMonth()) && (CURRENT_TIME.getDate() < birthdate.getDate()))
+    CURRENT_TIME.getMonth() - birthdate.getMonth() < 0 ||
+    (CURRENT_TIME.getMonth() == birthdate.getMonth() &&
+      CURRENT_TIME.getDate() < birthdate.getDate())
   ) {
     age--;
   }
@@ -53,7 +50,7 @@ const validateSignUpBody = (body) => {
     via,
     state,
     //locality
-  } = body
+  } = body;
 
   if (
     !firstName ||
@@ -63,14 +60,16 @@ const validateSignUpBody = (body) => {
     !birthdate ||
     !zipCode ||
     !via ||
-    !state 
+    !state
     //!locality
   ) {
     throw new Error("Debes completar todos los campos para avanzar");
   }
 
   if (!Object.values(USER_VIA).includes(via)) {
-    throw new Error(`Via must be one of the following: ${Object.values(USER_VIA)}`);
+    throw new Error(
+      `Via must be one of the following: ${Object.values(USER_VIA)}`
+    );
   }
 
   validateBirthdate(birthdate);
@@ -100,14 +99,24 @@ const validateSignUpBody = (body) => {
   }
 };
 
-const sendVerificationEmail = async (email, firstName, lastName, verificationToken) => {
+const sendVerificationEmail = async (
+  email,
+  firstName,
+  lastName,
+  verificationToken
+) => {
   const transport = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
+    host: "smtp.zoho.com",
     auth: {
       user: NODEMAILER_EMAIL,
-      pass: NODEMAILER_PASSWORD
-    }
+      pass: NODEMAILER_PASSWORD,
+    },
+    port: 465,
+    secure: true,
+    tls: {
+      rejectUnauthorized: false,
+    },
+    requireTLS: true,
   });
 
   const accountVerificationLink = `http://localhost:5173/verify-account?t=${verificationToken}&email=${email}`;
@@ -119,7 +128,7 @@ const sendVerificationEmail = async (email, firstName, lastName, verificationTok
     html: `
     Hola, ${firstName} ${lastName}!
     <p>Haz click <a href="${accountVerificationLink}">aquí</a> verificar tu cuenta</p>
-    `
+    `,
   };
 
   try {
@@ -137,35 +146,45 @@ const signup = async (req, res) => {
   try {
     validateSignUpBody(body);
   } catch (error) {
-    return res.status(400).json({ message: error.message ?? "Incorrect body" })
+    return res.status(400).json({ message: error.message ?? "Incorrect body" });
   }
 
   let existingUser;
   try {
     existingUser = await findUser({ email: body.email });
-    return res.status(409).jsonn({ message: "El email ingresado ya está siendo utilizado" });
-  } catch (error) { }
+    return res
+      .status(409)
+      .jsonn({ message: "El email ingresado ya está siendo utilizado" });
+  } catch (error) {}
 
   let createdUser;
   try {
     const salt = genSaltSync(10);
     body.password = hashSync(body.password, salt);
     body.isVerified = false;
-    body.verificationToken = hashSync(JSON.stringify({ email: body.email, firstName: body.firstName, lastName: body.lastName }), salt);
+    body.verificationToken = hashSync(
+      JSON.stringify({
+        email: body.email,
+        firstName: body.firstName,
+        lastName: body.lastName,
+      }),
+      salt
+    );
 
     createdUser = await createUser(body);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 
-  const { _id, firstName, lastName, email, birthdate, verificationToken } = createdUser;
+  const { _id, firstName, lastName, email, birthdate, verificationToken } =
+    createdUser;
   const returnedUser = { _id, firstName, lastName, email, birthdate };
 
   await sendVerificationEmail(email, firstName, lastName, verificationToken);
-  return res.status(201).json(returnedUser)
+  return res.status(201).json(returnedUser);
 };
 
-router.post('/signup', signup);
+router.post("/signup", signup);
 
 const validateQueryParams = (query) => {
   if (Object.keys(query).length != 2) {
@@ -184,30 +203,32 @@ const verifyAccount = async (req, res) => {
   try {
     validateQueryParams(query);
   } catch (error) {
-    return res.status(400).json({ message: "El link es incorrecto o ya expiró" })
+    return res
+      .status(400)
+      .json({ message: "El link es incorrecto o ya expiró" });
   }
 
   try {
     const { email, t: token } = query;
     await findUser({ email, isVerified: false, verificationToken: token });
     await updateUser({ email }, { isVerified: true, verificationToken: "" });
-
-
   } catch (error) {
-    return res.status(400).json({ message: "El link es incorrecto o ya expiró" })
+    return res
+      .status(400)
+      .json({ message: "El link es incorrecto o ya expiró" });
   }
 
   return res.status(200).json({ msg: "User verified successfully" });
 };
 
-router.post('/verify-account', verifyAccount);
+router.post("/verify-account", verifyAccount);
 
 const validateLoginBody = (body) => {
   if (Object.keys(body).length != 2) {
     throw new Error("Debes enviar email y contraseña para iniciar sesión");
   }
 
-  const { email, password } = body
+  const { email, password } = body;
   if (!email || !password) {
     throw new Error("Debes enviar email y contraseña para iniciar sesión");
   }
@@ -218,12 +239,12 @@ const createJWT = async (data) => {
 };
 
 const login = async (req, res) => {
-  const { body } = req
+  const { body } = req;
 
   try {
     validateLoginBody(body);
   } catch (error) {
-    return res.status(400).json({ message: error.message })
+    return res.status(400).json({ message: error.message });
   }
 
   let user;
@@ -239,15 +260,16 @@ const login = async (req, res) => {
     if (!user.isVerified) {
       throw new Error("Debes verificar la cuenta para poder iniciar sesión");
     }
-
   } catch (error) {
-    return res.status(400).json({ message: error.message ?? "Email o contraseña incorrectas" });
+    return res
+      .status(400)
+      .json({ message: error.message ?? "Email o contraseña incorrectas" });
   }
 
   const jwt = await createJWT({ id: user._id });
   return res.status(200).json({ token: jwt, firstName: user.firstName });
 };
 
-router.post('/login', login);
+router.post("/login", login);
 
 export { router };
