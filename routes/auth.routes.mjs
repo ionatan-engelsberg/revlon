@@ -119,7 +119,7 @@ const sendVerificationEmail = async (
     requireTLS: true,
   });
 
-  const accountVerificationLink = `http://localhost:5173/verify-account?t=${verificationToken}&email=${email}`;
+  const accountVerificationLink = `https://revlon-testing.netlify.app/verify-account?t=${verificationToken}&email=${email}`;
 
   const message = {
     from: ZOHO_EMAIL,
