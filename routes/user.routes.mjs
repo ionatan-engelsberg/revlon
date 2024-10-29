@@ -56,9 +56,9 @@ const validateTicket = (number, store, type) => {
   }
 
   // TODO
-  if (number.length < 10) {
-    throw new Error("El n° de ticket debe tener al menos 10 caracteres");
-  }
+  // if (number.length < 10) {
+  //   throw new Error("El n° de ticket debe tener al menos 10 caracteres");
+  // }
 };
 
 const validateUploadTicketBody = async (body) => {
