@@ -128,8 +128,8 @@ const sendVerificationEmail = async (
     to: email,
     subject: "Verificación de Cuenta | Dale ON a tu estilo",
     html: `
-    <h3>Hola, <b>${firstName} ${lastName}</b>!</h3>
-    <h6>Haz click <a href="${accountVerificationLink}">aquí</a> verificar tu cuenta</h6>
+    <h1>Hola, <b>${firstName} ${lastName}</b>!</h1>
+    <h3>Haz click <a href="${accountVerificationLink}">aquí</a> verificar tu cuenta</h3>
     `,
   };
 
