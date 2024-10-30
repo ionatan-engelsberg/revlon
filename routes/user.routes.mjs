@@ -1,10 +1,16 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from "cloudinary";
+import nodemailer from 'nodemailer';
+import { config } from "dotenv";
 
 import { ORDER_TYPE, TICKET_STORE, ALLOWED_ONLINE_STORES, ALLOWED_PHYSICAL_STORES } from "../constants.mjs";
 
-import { createTicket, getContest, getProduct, getUserTickets } from "../db/repository.mjs";
+import { createTicket, findUser, getContest, getProduct, getUserTickets } from "../db/repository.mjs";
+
+config();
+
+const { ZOHO_EMAIL, ZOHO_PASSWORD } = process.env;
 
 const router = express.Router();
 const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env
@@ -16,6 +22,47 @@ cloudinary.config(
     api_secret: CLOUDINARY_API_SECRET
   }
 );
+
+const sendUploadedTicketEmail = async (
+  email,
+  firstName,
+  lastName,
+  guesses
+) => {
+  const transport = nodemailer.createTransport({
+    host: "smtp.zoho.com",
+    auth: {
+      user: ZOHO_EMAIL,
+      pass: ZOHO_PASSWORD,
+    },
+    port: 465,
+    secure: true,
+    tls: {
+      rejectUnauthorized: false,
+    },
+    requireTLS: true,
+  });
+
+  const message = {
+    from: ZOHO_EMAIL,
+    to: email,
+    subject: "Ticket subido con éxito",
+    html: `
+    <h1>Hola, <b>${firstName} ${lastName}</b>!</h1>
+    <h3>Gracias por participar en el concurso de Revlon!</h3>
+    <h3>Tus cálculos de hoy fueron: ${guesses[0].guess} - ${guesses[1].guess}</h3>
+    <h3>Sigue participando, tu puedes ser nuestro próximo ganador</h3>
+    `,
+  };
+
+  try {
+    await transport.sendMail(message);
+    // TODO: Verification handling
+  } catch (error) {
+    console.log("ERROR: ", error);
+    // TODO: Error handling
+  }
+};
 
 const checkIfAuthenticated = (req, res) => {
   if (!req.headers?.authorization) {
@@ -108,16 +155,16 @@ const validateUploadTicketBody = async (body) => {
   }
 
   let imageUrl;
-  try {
-    const cloudinaryAsset = await cloudinary.api.resource(imageId);
-    if (!cloudinary.url){
-      throw new Error("La imagen subida es inválida");
-    }
+  // try {
+  //   const cloudinaryAsset = await cloudinary.api.resource(imageId);
+  //   if (!cloudinary.url) {
+  //     throw new Error("La imagen subida es inválida");
+  //   }
 
-    imageUrl = cloudinaryAsset.url;
-  } catch (error) {
-    throw new Error("La imagen subida es inválida");
-  }
+  //   imageUrl = cloudinaryAsset.url;
+  // } catch (error) {
+  //   throw new Error("La imagen subida es inválida");
+  // }
 
   const product = await getProduct({ barCode });
   return { product, imageUrl };
@@ -156,12 +203,18 @@ const uploadTicket = async (req, res) => {
     };
 
     await createTicket(ticket);
-
-    return res.status(200).json({ message: "OK" })
   } catch (error) {
     return res.status(500).json({ message: error.message ?? "Ocurrió un error al intentar subir el ticket.Por favor vuelva a intentarlo" });
-
   }
+
+  try {
+    const user = await findUser({ _id: userId }, 'firstName lastName email');
+    await sendUploadedTicketEmail(user.email, user.firstName, user.lastName, guesses);
+  } catch (error) {
+    console.log("ERROR sending email: ", error);
+  }
+
+  return res.status(200).json({ message: "OK" })
 };
 
 router.post('/', uploadTicket);

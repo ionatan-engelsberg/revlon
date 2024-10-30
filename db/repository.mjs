@@ -10,7 +10,7 @@ const DUPLICATE_VALUE_ERROR_CODE = 11000;
 const handleMongoError = (error) => {
   if (error.code === DUPLICATE_VALUE_ERROR_CODE) {
     const duplicateValue = Object.keys(error.keyValue)[0];
-    throw new Error(`Conflict error: ${duplicateValue} is already in use`);
+    throw new Error(`Error: un usuario con el ${duplicateValue} ingresado yaexiste`);
   }
 
   if (error instanceof Error.ValidationError) {
@@ -73,7 +73,7 @@ export const getProduct = async (filter, fields) => {
   }
 
   if (!product) {
-    throw new Error('Product with provided filter does not exist');
+    throw new Error('El producto solicitado no existe');
   }
 
   return product;
@@ -118,7 +118,7 @@ export const getContest = async (contestId, fields) => {
   }
 
   if (!contest) {
-    throw new Error('Contest with provided filter does not exist');
+    throw new Error('El concurso solicitado no existe');
   }
 
   return contest;
