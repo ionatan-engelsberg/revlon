@@ -55,6 +55,9 @@ export const UserSchema = new Schema({
   //   type: String,
   //   required: [true, "User locality is required"]
   // }
+  participations: {
+    type: Number
+  }
 },
   { timestamps: true, versionKey: false });
 

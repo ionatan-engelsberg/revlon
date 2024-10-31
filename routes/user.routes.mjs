@@ -6,7 +6,7 @@ import { config } from "dotenv";
 
 import { ORDER_TYPE, TICKET_STORE, ALLOWED_ONLINE_STORES, ALLOWED_PHYSICAL_STORES } from "../constants.mjs";
 
-import { createTicket, findUser, getContest, getProduct, getUserTickets } from "../db/repository.mjs";
+import { createTicket, findUser, getContest, getProduct, getUserTickets, updateUser } from "../db/repository.mjs";
 
 config();
 
@@ -27,7 +27,8 @@ const sendUploadedTicketEmail = async (
   email,
   firstName,
   lastName,
-  guesses
+  guesses,
+  participations
 ) => {
   const transport = nodemailer.createTransport({
     host: "smtp.zoho.com",
@@ -51,6 +52,7 @@ const sendUploadedTicketEmail = async (
     <h1>Hola, <b>${firstName} ${lastName}</b>!</h1>
     <h3>Gracias por participar en el concurso de Revlon!</h3>
     <h3>Tus cálculos de hoy fueron: ${guesses[0].guess} - ${guesses[1].guess}</h3>
+    <h3>Tu número de participaciones es ${participations}</h3>
     <h3>Sigue participando, tu puedes ser nuestro próximo ganador</h3>
     `,
   };
@@ -155,16 +157,16 @@ const validateUploadTicketBody = async (body) => {
   }
 
   let imageUrl;
-  // try {
-  //   const cloudinaryAsset = await cloudinary.api.resource(imageId);
-  //   if (!cloudinary.url) {
-  //     throw new Error("La imagen subida es inválida");
-  //   }
+  try {
+    const cloudinaryAsset = await cloudinary.api.resource(imageId);
+    if (!cloudinary.url) {
+      throw new Error("La imagen subida es inválida");
+    }
 
-  //   imageUrl = cloudinaryAsset.url;
-  // } catch (error) {
-  //   throw new Error("La imagen subida es inválida");
-  // }
+    imageUrl = cloudinaryAsset.url;
+  } catch (error) {
+    throw new Error("La imagen subida es inválida");
+  }
 
   const product = await getProduct({ barCode });
   return { product, imageUrl };
@@ -208,8 +210,10 @@ const uploadTicket = async (req, res) => {
   }
 
   try {
-    const user = await findUser({ _id: userId }, 'firstName lastName email');
-    await sendUploadedTicketEmail(user.email, user.firstName, user.lastName, guesses);
+    const user = await findUser({ _id: userId }, '-password -verificationToken -createdAt -updatedAt');
+    const { email, firstName, lastName, participations } = user;
+    await updateUser({ email }, { participations: participations + 1 });
+    await sendUploadedTicketEmail(email, firstName, lastName, guesses, participations + 1);
   } catch (error) {
     console.log("ERROR sending email: ", error);
   }

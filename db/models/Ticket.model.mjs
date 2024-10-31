@@ -36,7 +36,7 @@ export const TicketSchema = new Schema({
   },
   image: {
     type: String,
-    // required: [true, 'Ticket image is required']
+    required: [true, 'Ticket image is required']
   },
   store: {
     type: String,

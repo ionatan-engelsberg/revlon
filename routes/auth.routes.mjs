@@ -156,7 +156,7 @@ const signup = async (req, res) => {
     existingUser = await findUser({ email: body.email });
     return res
       .status(409)
-      .jsonn({ message: "El email ingresado ya está siendo utilizado" });
+      .json({ message: "El email ingresado ya está siendo utilizado" });
   } catch (error) {}
 
   let createdUser;
@@ -172,6 +172,7 @@ const signup = async (req, res) => {
       }),
       salt
     );
+    body.participations = 0;
 
     createdUser = await createUser(body);
   } catch (error) {
