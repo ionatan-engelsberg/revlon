@@ -44,6 +44,9 @@ const sendUploadedTicketEmail = async (
     requireTLS: true,
   });
 
+  const mainContestGuess = guesses.find((g) => g.contest == "670653e60f4fffe73735f909");
+  const weeklyContestGuess = guesses.find((g) => g.contest != "670653e60f4fffe73735f909");
+
   const message = {
     from: ZOHO_EMAIL,
     to: email,
@@ -51,7 +54,8 @@ const sendUploadedTicketEmail = async (
     html: `
     <h1>Hola, <b>${firstName} ${lastName}</b>!</h1>
     <h3>Gracias por participar en el concurso de Revlon!</h3>
-    <h3>Tus cálculos de hoy fueron: ${guesses[0].guess} - ${guesses[1].guess}</h3>
+    <h3>Tu cálculo para participar del Kit Revlon fue: ${weeklyContestGuess.guess}</h3>
+    <h3>Tu cálculo para participar del viaje fue: ${mainContestGuess.guess}</h3>
     <h3>Tu número de participaciones es ${participations}</h3>
     <h3>Sigue participando, tu puedes ser nuestro próximo ganador</h3>
     `,
