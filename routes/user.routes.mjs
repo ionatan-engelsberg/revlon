@@ -138,27 +138,27 @@ const validateUploadTicketBody = async (body) => {
     throw new Error("No puede ingresar dos adivinanzas para el mismo concurso");
   }
 
-  let mainAmount = 0;
-  for (const g of guesses) {
-    if (typeof g.guess != "number") {
-      throw new Error("Incorrect guesses format");
-    }
-    const contest = await getContest(g.contest, "_id main startDate endDate");
+  // let mainAmount = 0;
+  // for (const g of guesses) {
+  //   if (typeof g.guess != "number") {
+  //     throw new Error("Incorrect guesses format");
+  //   }
+  //   const contest = await getContest(g.contest, "_id main startDate endDate");
 
-    const { startDate, endDate, main } = contest;
+  //   const { startDate, endDate, main } = contest;
 
-    if (Date.now() < startDate.getTime() || Date.now() > endDate.getTime()) {
-      throw new Error("El concurso seleccionado ya expiró o no ha comenzado aún");
-    }
+  //   if (Date.now() < startDate.getTime() || Date.now() > endDate.getTime()) {
+  //     throw new Error("El concurso seleccionado ya expiró o no ha comenzado aún");
+  //   }
 
-    if (main) {
-      mainAmount++
-    }
-  }
+  //   if (main) {
+  //     mainAmount++
+  //   }
+  // }
 
-  if (mainAmount != 1) {
-    throw new Error("Debes enviar adivinanzas para un concurso semanal y un concurso principal");
-  }
+  // if (mainAmount != 1) {
+  //   throw new Error("Debes enviar adivinanzas para un concurso semanal y un concurso principal");
+  // }
 
   let imageUrl;
   try {
