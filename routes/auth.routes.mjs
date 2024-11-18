@@ -119,7 +119,7 @@ const sendVerificationEmail = async (
     requireTLS: true,
   });
 
-  const prodLink = `https://revlon-testing.netlify.app/verify-account?t=${verificationToken}&email=${email}`;
+  const prodLink = `https://daleonatuestilo.com/verify-account?t=${verificationToken}&email=${email}`;
   const testLink = `http://localhost:5173/verify-account?t=${verificationToken}&email=${email}`;
   const accountVerificationLink = prodLink
 
